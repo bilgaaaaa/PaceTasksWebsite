@@ -1,20 +1,32 @@
-/* Shared look for the PaceTasks website: the app's Sage theme, light and dark, and its system type. */
+/* Shared look for the PaceTasks website: the app's Sage theme, light and dark, and its system type.
+   Every animation starts from its resting state, so reduced motion simply shows the finished page. */
 :root {
   --background: #e7efe1;
   --background-end: #d7e4d0;
   --surface: #f6f8f1;
+  --surface-alt: #edf1e7;
   --border: #d6e0cf;
   --text-primary: #26332a;
   --text-secondary: #56634f;
   --accent: #3f7446;
+  --on-accent: #ffffff;
+  --quick-fill: #d3e6cf;
+  --quick-text: #2c5733;
   /* The Today hero card: forest green, daffodil title, cream copy. */
   --hero-card: #2f4636;
   --hero-title: #f7e289;
   --hero-body: #fbf6ee;
   --hero-blob-a: linear-gradient(135deg, #9fc89d, #4e8552);
   --hero-blob-b: linear-gradient(135deg, #f7e289, #b79a65);
+  /* Pace heatmap, from an empty day to the busiest. */
+  --heat-0: #d6e0cf;
+  --heat-1: #b9d6b4;
+  --heat-2: #9fc89d;
+  --heat-3: #4e8552;
+  --heat-4: #3f7446;
   --phone-bezel: #1b231d;
   --shadow: rgba(38, 51, 42, 0.18);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -22,11 +34,20 @@
     --background: #141a16;
     --background-end: #101512;
     --surface: #1d2520;
+    --surface-alt: #242e27;
     --border: #2e3931;
     --text-primary: #e4ecdf;
     --text-secondary: #a3b09e;
     --accent: #8dc495;
+    --on-accent: #10180f;
+    --quick-fill: #253a29;
+    --quick-text: #b5ddb5;
     --hero-card: #2a3d30;
+    --heat-0: #2e3931;
+    --heat-1: #34503a;
+    --heat-2: #4f7a56;
+    --heat-3: #7db886;
+    --heat-4: #8dc495;
     --phone-bezel: #050806;
     --shadow: rgba(0, 0, 0, 0.45);
   }
@@ -45,22 +66,47 @@ body {
 img { max-width: 100%; display: block; }
 a { color: var(--accent); text-underline-offset: 0.15em; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
-h1, h2, h3 { font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+h1, h2, h3 { font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; }
 p, li { color: var(--text-primary); }
-.skip-link { position: absolute; left: 1rem; top: -4rem; padding: 0.5rem 1rem; background: var(--surface); }
+.skip-link { position: absolute; left: 1rem; top: -4rem; z-index: 40; padding: 0.5rem 1rem; background: var(--surface); }
 .skip-link:focus { top: 1rem; }
 
-/* Header and footer, shared by every page. */
-.site-header,
-.site-footer {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 1.25rem 1rem;
+/* Reading progress along the top edge. */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  scale: 0 1;
+}
+
+/* Header: transparent at the top, a frosted bar once the page scrolls (site.js). */
+.site-header {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 20;
+  width: calc(100% - 1rem);
+  max-width: 71rem;
+  margin: 0.5rem auto 0;
+  padding: 0.75rem 0.5rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+}
+.is-scrolled .site-header {
+  padding-inline: 1rem;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border-color: var(--border);
+  box-shadow: 0 12px 30px -20px var(--shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
 }
 .brand {
   display: inline-flex;
@@ -77,9 +123,14 @@ p, li { color: var(--text-primary); }
 .site-nav a:hover,
 .site-nav a[aria-current="page"] { color: var(--text-primary); }
 .site-footer {
-  margin-top: 4rem;
-  padding-top: 1.5rem;
-  padding-bottom: 2.5rem;
+  max-width: 72rem;
+  margin: 4rem auto 0;
+  padding: 1.5rem 1rem 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
   border-top: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 0.9rem;
@@ -96,13 +147,40 @@ p, li { color: var(--text-primary); }
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
+  transition: translate 0.2s var(--ease-out), box-shadow 0.2s ease, filter 0.2s ease;
 }
 .button-hero { background: var(--hero-title); color: var(--hero-card); }
-.button-hero:hover { filter: brightness(1.05); }
+.button-hero:hover { filter: brightness(1.05); translate: 0 -2px; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.5); }
+.button-hero:active { translate: 0 0; }
 .button-hero:focus-visible { outline-color: var(--hero-title); }
 
+/* Pills and chips, as the app draws time estimates and tasks. */
+.pill {
+  flex-shrink: 0;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.pill-quick { background: var(--quick-fill); color: var(--quick-text); }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -16px var(--shadow);
+}
+
 /* Landing page. */
-.landing { max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
+.landing { max-width: 72rem; margin: 0.5rem auto 0; padding: 0 1rem; }
 
 .hero-card {
   position: relative;
@@ -133,29 +211,28 @@ p, li { color: var(--text-primary); }
   opacity: 0.3;
   pointer-events: none;
 }
-@keyframes drift {
-  from { transform: translate(0, 0); }
-  to { transform: translate(-2.5rem, 1.5rem); }
-}
 .hero-copy { align-self: center; max-width: 34rem; }
-.hero-copy h1 {
+.hero-title {
   margin: 0 0 1.25rem;
   color: var(--hero-title);
   font-size: clamp(2.75rem, 1.6rem + 4.6vw, 5.25rem);
   line-height: 1;
   letter-spacing: -0.045em;
 }
-.hero-lede { margin: 0 0 2rem; color: var(--hero-body); font-size: 1.2rem; line-height: 1.55; }
+.hero-title .word { display: inline-block; animation: word-in 0.7s var(--ease-out) both; animation-delay: calc(0.1s + var(--w) * 0.07s); }
+.hero-lede { margin: 0 0 2rem; color: var(--hero-body); font-size: 1.2rem; line-height: 1.55; animation: fade-up 0.7s var(--ease-out) 0.65s both; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+.hero-copy .hero-actions { animation: fade-up 0.7s var(--ease-out) 0.8s both; }
 .hero-status { margin: 0; color: var(--hero-body); opacity: 0.85; font-size: 0.95rem; }
 
-/* Phone frame: the screenshot, or the live demo once started. */
+/* Phone frame: a screenshot, or the live demo once started. */
 .phone {
   margin: 0;
   justify-self: center;
   width: min(100%, 300px);
 }
 .phone-screen {
+  position: relative;
   aspect-ratio: 393 / 852;
   overflow: hidden;
   border: 10px solid var(--phone-bezel);
@@ -166,26 +243,158 @@ p, li { color: var(--text-primary); }
 .phone-screen img,
 .phone-screen iframe { width: 100%; height: 100%; border: 0; object-fit: cover; object-position: top; }
 .phone figcaption { margin-top: 0.9rem; color: var(--text-secondary); font-size: 0.85rem; text-align: center; }
-/* In the hero, the phone rises out of the card's bottom edge on small screens. */
-.hero-phone { max-height: 22rem; overflow: hidden; }
-.hero-phone figcaption { display: none; }
 
-/* Feature rows: text and screenshot side by side, alternating on wide screens. */
-.features { display: grid; gap: 4.5rem; margin: 5rem 0; }
+/* Hero visual: the Today phone in front, Brain Dump and Pace fanned out behind, tasks floating around. */
+.hero-visual { position: relative; display: grid; justify-items: center; isolation: isolate; }
+/* On small screens the phone rises out of the card's bottom edge. */
+.hero-phone { position: relative; z-index: 1; max-height: 22rem; overflow: hidden; animation: rise-in 0.9s var(--ease-out) 0.25s both; }
+.hero-phone figcaption { display: none; }
+.hero-side,
+.hero-chips { display: none; }
+
+/* A strip of real tasks in three languages, drifting past. */
+.ribbon {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.ribbon-track {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem 0 1.25rem;
+  list-style: none;
+  animation: marquee 48s linear infinite;
+}
+.ribbon:hover .ribbon-track { animation-play-state: paused; }
+
+/* Features: on wide screens one pinned phone follows along while the text scrolls (home.js). */
+.story { display: grid; gap: 4.5rem; margin: 4rem 0 5rem; }
+.story-steps { display: grid; gap: 4.5rem; }
+.story-stage { display: none; }
 .feature { display: grid; gap: 2rem; align-items: center; }
 .feature h2 { margin: 0 0 1rem; font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem); }
-.feature p { margin: 0 0 1rem; max-width: 34rem; color: var(--text-secondary); }
-.feature .phone { width: min(100%, 250px); }
-.feature-quote {
-  margin: 1.5rem 0 0;
-  padding: 1rem 1.25rem;
+.feature-copy > p { margin: 0 0 1rem; max-width: 34rem; color: var(--text-secondary); }
+.feature-phone { width: min(100%, 250px); }
+.story-dots { display: flex; gap: 0.5rem; }
+.story-dots span { width: 8px; height: 8px; border-radius: 999px; background: var(--border); transition: width 0.3s var(--ease-out), background-color 0.3s ease; }
+.story-dots span.is-active { width: 24px; background: var(--accent); }
+
+/* Shared look for the small working pieces inside the features. */
+.widget {
   max-width: 34rem;
-  border-left: 4px solid var(--accent);
-  border-radius: 0 14px 14px 0;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 22px;
   background: var(--surface);
-  font-size: 1.15rem;
-  line-height: 1.45;
+  box-shadow: 0 20px 40px -32px var(--shadow);
 }
+.widget h3 { margin: 0 0 1rem; font-size: 1.05rem; }
+
+/* Fit my time: a slider, an energy switch and the plan that fits. */
+.fit-controls { display: grid; gap: 0.85rem; margin-bottom: 1rem; }
+.fit-label { display: flex; justify-content: space-between; font-weight: 600; }
+.fit-label output { color: var(--accent); font-variant-numeric: tabular-nums; }
+.fit-controls input[type="range"] { width: 100%; accent-color: var(--accent); }
+.segmented { display: inline-flex; justify-self: start; padding: 0.25rem; border-radius: 999px; background: var(--surface-alt); }
+.segmented button {
+  min-height: 40px;
+  padding: 0.35rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.segmented button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.fit-plan { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.fit-plan li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 14px;
+  background: var(--surface-alt);
+  animation: fade-up 0.35s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+}
+.fit-total { margin: 0.9rem 0 0; color: var(--text-secondary); font-size: 0.92rem; }
+html:not(.js) .fit-controls { display: none; }
+
+/* Brain Dump: the sentence types itself, "Sort it out" presses, and the tasks deal out. */
+.dump-text {
+  min-height: 3.3em;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: var(--surface-alt);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.dump-text.is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.2em;
+  background: var(--accent);
+  animation: caret 1s steps(1) infinite;
+}
+.dump-button {
+  display: inline-flex;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  transition: scale 0.15s ease, filter 0.15s ease;
+}
+.dump.is-pressed .dump-button { scale: 0.94; filter: brightness(0.9); }
+.dump-cards { display: grid; gap: 0.5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+.dump-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 0.7rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: opacity 0.4s ease, translate 0.5s var(--ease-out), scale 0.5s var(--ease-out);
+  transition-delay: calc(var(--i) * 0.16s);
+}
+.dump-card::before {
+  content: "";
+  grid-row: span 2;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 0.8rem no-repeat;
+}
+.dump-card span { color: var(--text-secondary); font-size: 0.88rem; }
+.dump.is-waiting .dump-card { opacity: 0; translate: 0 0.75rem; scale: 0.97; }
+
+/* Pace: counters and a 13-week heatmap that fill in once seen. */
+.pace-stats { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; margin-bottom: 1rem; }
+.pace-stats p { margin: 0; color: var(--text-secondary); }
+.pace-stats strong { display: block; color: var(--text-primary); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.heatmap { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; max-width: 26rem; }
+.heat { aspect-ratio: 1; border-radius: 4px; background: var(--heat-0); transition: background-color 0.35s ease; transition-delay: calc(var(--i) * 10ms); }
+.heatmap.is-filled .heat-1 { background: var(--heat-1); }
+.heatmap.is-filled .heat-2 { background: var(--heat-2); }
+.heatmap.is-filled .heat-3 { background: var(--heat-3); }
+.heatmap.is-filled .heat-4 { background: var(--heat-4); }
+.pace-caption { margin: 0.75rem 0 0; color: var(--text-secondary); font-size: 0.85rem; }
+html:not(.js) .pace-card { display: none; }
 
 /* Privacy promise and questions. */
 .split { display: grid; gap: 1.5rem; padding: 3rem 0; border-top: 1px solid var(--border); }
@@ -208,22 +417,76 @@ p, li { color: var(--text-primary); }
 .questions details:first-child { padding-top: 0; }
 .questions summary { cursor: pointer; font-weight: 600; }
 .questions details p { margin: 0.5rem 0 0; color: var(--text-secondary); }
+.questions details[open] p { animation: fade-up 0.3s var(--ease-out) both; }
 .questions > p { margin: 1.25rem 0 0; }
 
+/* Closing card: the hero's look once more, with the way in. */
+.cta-card { padding-bottom: 3rem; margin-top: 2rem; align-items: center; }
+.cta-card h2 { margin: 0 0 0.75rem; color: var(--hero-title); font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem); letter-spacing: -0.035em; }
+.cta-card p { color: var(--hero-body); }
+.cta-copy > p { margin: 0 0 1.75rem; max-width: 32rem; font-size: 1.1rem; }
+.cta-icon { display: none; }
+
 @media (min-width: 900px) {
-  .hero-card { grid-template-columns: 1.15fr 1fr; padding: 4rem 4rem 3.5rem; }
+  .hero-card { grid-template-columns: 1.05fr 1fr; padding: 4rem 4rem 3.5rem; }
   .hero-blob-a { width: 34rem; height: 34rem; right: -14rem; top: -14rem; }
   .hero-blob-b { width: 22rem; height: 22rem; right: 18%; bottom: -12rem; }
-  .hero-phone { max-height: none; overflow: visible; width: 330px; }
+  .hero-visual {
+    transform: perspective(1400px) rotateY(var(--tilt-x, 0deg)) rotateX(var(--tilt-y, 0deg));
+    transition: transform 0.6s var(--ease-out);
+  }
+  .hero-visual.is-live { transform: none; }
+  .hero-phone { max-height: none; overflow: visible; width: 320px; }
   .hero-phone figcaption { display: block; color: var(--hero-body); opacity: 0.8; }
-  .feature { grid-template-columns: 1fr 1fr; gap: 4rem; }
-  .feature .phone { width: 280px; }
-  .feature:nth-child(even) .phone { order: -1; }
+  .hero-side { display: block; position: absolute; top: 4rem; left: 50%; z-index: 0; width: 230px; }
+  .hero-side-left { transform: translateX(calc(-50% - 7rem)) rotate(-9deg); animation: fan-left 1s var(--ease-out) 0.55s both; }
+  .hero-side-right { transform: translateX(calc(-50% + 7rem)) rotate(9deg); animation: fan-right 1s var(--ease-out) 0.55s both; }
+  .hero-chips { display: block; position: absolute; inset: 0; z-index: 2; margin: 0; padding: 0; list-style: none; pointer-events: none; transition: opacity 0.3s ease; }
+  .hero-chips .chip {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    animation: chip-in 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) both, float 6s ease-in-out infinite;
+    animation-delay: calc(1.2s + var(--n) * 0.15s), calc(var(--n) * -2s);
+  }
+  .hero-visual.is-live .hero-chips { opacity: 0; }
+
+  .story { grid-template-columns: 1fr auto; gap: 4rem; align-items: start; }
+  .story-steps { gap: 0; }
+  .feature { min-height: 85vh; align-content: center; }
+  .feature-phone { display: none; }
+  .story-stage { display: grid; justify-items: center; gap: 1.25rem; position: sticky; top: max(5.5rem, calc(50vh - 22rem)); }
+  .story-phone { width: min(300px, calc((100vh - 9rem) * 0.44)); }
+  .story-phone img { position: absolute; inset: 0; opacity: 0; scale: 1.04; transition: opacity 0.5s ease, scale 0.6s var(--ease-out); }
+  .story-phone img.is-active { opacity: 1; scale: 1; }
+
   .split { grid-template-columns: 1fr 1.6fr; gap: 3rem; }
+  .cta-card { grid-template-columns: 1fr auto; padding: 4rem; }
+  .cta-icon { display: block; width: 132px; height: 132px; border-radius: 30px; box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.6); rotate: 8deg; animation: float 7s ease-in-out infinite; }
 }
 
+/* Sections ease in as they scroll into view, where the browser ties animations to scrolling. */
+@supports (animation-timeline: view()) {
+  .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 5% cover 30%; }
+  .scroll-progress { animation: progress linear both; animation-timeline: scroll(root); }
+}
+
+@keyframes drift { to { transform: translate(-2.5rem, 1.5rem); } }
+@keyframes word-in { from { opacity: 0; translate: 0 0.35em; } }
+@keyframes fade-up { from { opacity: 0; translate: 0 0.75rem; } }
+@keyframes rise-in { from { opacity: 0; translate: 0 3rem; } }
+@keyframes fan-left { from { opacity: 0; transform: translateX(-50%) rotate(0deg); } }
+@keyframes fan-right { from { opacity: 0; transform: translateX(-50%) rotate(0deg); } }
+@keyframes chip-in { from { opacity: 0; scale: 0.6; } }
+@keyframes float { 50% { translate: 0 -10px; } }
+@keyframes marquee { to { translate: calc(-100% - 0.75rem) 0; } }
+@keyframes caret { 50% { opacity: 0; } }
+@keyframes reveal { from { opacity: 0; translate: 0 2rem; } }
+@keyframes progress { to { scale: 1 1; } }
+
 @media (prefers-reduced-motion: reduce) {
-  .hero-blob { animation: none; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .story-phone img { transition: none; }
 }
 
 /* Policy and help pages: one readable column. */
