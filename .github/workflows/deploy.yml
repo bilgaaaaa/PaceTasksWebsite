@@ -1,0 +1,70 @@
+# Publishes the website: the pages in this repository plus the web demo, built
+# from the PaceTasks app (bilgaaaaa/pacetasks) into demo/. Runs daily too, so the
+# demo follows the app's main branch. Pull requests only build the site.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+      - uses: actions/checkout@v4
+        with:
+          repository: bilgaaaaa/pacetasks
+          path: app
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+        working-directory: app
+      # The site's path on Pages: /PaceTasksWebsite, or empty once a custom domain is set.
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Copy the pages
+        run: |
+          cp -r site _site
+          rm -rf _site/.git _site/.github _site/.gitignore _site/README.md
+      - name: Build the demo
+        working-directory: app
+        run: npx expo export --platform web --output-dir ../_site/demo
+        env:
+          EXPO_PUBLIC_DEMO_MODE: "1"
+          WEB_BASE_URL: ${{ steps.pages.outputs.base_path }}/demo
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
