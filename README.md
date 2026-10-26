@@ -8,7 +8,9 @@ privacy policy URL and `support.html` the support URL. The app keeps these addre
 
 ## Files
 
-Plain HTML, CSS and a few lines of JavaScript in the app's Sage theme, light and dark, with no build step.
+Plain HTML, CSS and JavaScript in the app's Sage theme, light and dark, with no build step and no outside
+requests. Every animation starts from the page's resting state: with reduced motion switched on, or in a browser
+without scroll-linked animations, the page simply shows its finished state.
 
 | File | Purpose |
 | --- | --- |
@@ -16,7 +18,8 @@ Plain HTML, CSS and a few lines of JavaScript in the app's Sage theme, light and
 | `privacy.html` | Privacy policy |
 | `support.html` | Help and support |
 | `site.css` | Shared look: the app's colours and system type |
-| `site.js` | Starts the demo inside the hero phone on wide screens |
+| `site.js` | Every page: turns the header into a frosted bar once the page scrolls |
+| `home.js` | Landing page: the demo inside the hero phone, the tilting phone fan, the pinned phone that follows the features, Brain Dump typing itself, a working Fit my time and the Pace heatmap |
 | `screens/` | Screenshots of the web demo |
 | `og-image.png` | Link preview (1200×630): the hero card with the Today screen |
 | `icon.png`, `grain.png` | App icon, and the grain texture the app lays over its hero card |
