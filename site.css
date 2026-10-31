@@ -1,5 +1,21 @@
-/* Shared look for the PaceTasks website: the app's Sage theme, light and dark, and its system type.
-   Every animation starts from its resting state, so reduced motion simply shows the finished page. */
+/* Shared look for the PaceTasks website: the app's Sage theme, light and dark, and its system type,
+   with the app's brand colours for the moving parts. Every animation starts from its resting state,
+   so reduced motion simply shows the finished page. */
+
+/* Brand palette: the app's PALETTE names (src/lib/theme.ts), the same in light and dark. */
+:root {
+  --daffodil: #f7e289;
+  --poppy-fields: #f76f54;
+  --pool-time: #47b5a8;
+  --peaches: #fbb28b;
+  --cotton-candy: #f9a2c5;
+  --blue-skies: #a3c1e2;
+  --baby-lavender: #dbc0e8;
+  --hay-fields: #b79a65;
+  --night-time: #252d45;
+  --cream: #fbf6ee;
+}
+
 :root {
   --background: #e7efe1;
   --background-end: #d7e4d0;
@@ -26,6 +42,7 @@
   --heat-4: #3f7446;
   --phone-bezel: #1b231d;
   --shadow: rgba(38, 51, 42, 0.18);
+  --step-glow: 0.55; /* how strongly a feature's colour glows behind its phone */
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -50,6 +67,7 @@
     --heat-4: #8dc495;
     --phone-bezel: #050806;
     --shadow: rgba(0, 0, 0, 0.45);
+    --step-glow: 0.3;
   }
 }
 
@@ -76,8 +94,8 @@ p, li { color: var(--text-primary); }
   position: fixed;
   inset: 0 0 auto;
   z-index: 30;
-  height: 3px;
-  background: var(--accent);
+  height: 4px;
+  background: linear-gradient(90deg, var(--daffodil), var(--pool-time), var(--poppy-fields), var(--peaches), var(--baby-lavender));
   transform-origin: 0 50%;
   scale: 0 1;
 }
@@ -149,7 +167,7 @@ p, li { color: var(--text-primary); }
   text-decoration: none;
   transition: translate 0.2s var(--ease-out), box-shadow 0.2s ease, filter 0.2s ease;
 }
-.button-hero { background: var(--hero-title); color: var(--hero-card); }
+.button-hero { background: var(--hero-cta, var(--hero-title)); color: var(--hero-card); }
 .button-hero:hover { filter: brightness(1.05); translate: 0 -2px; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.5); }
 .button-hero:active { translate: 0 0; }
 .button-hero:focus-visible { outline-color: var(--hero-title); }
@@ -165,6 +183,8 @@ p, li { color: var(--text-primary); }
   font-weight: 600;
 }
 .pill-quick { background: var(--quick-fill); color: var(--quick-text); }
+/* A fixed start time, as the app's Focus pill: dark, with the evening's coral. */
+.pill-time { background: var(--night-time); color: var(--peaches); }
 .chip {
   display: inline-flex;
   align-items: center;
@@ -282,7 +302,41 @@ p, li { color: var(--text-primary); }
 .feature-phone { width: min(100%, 250px); }
 .story-dots { display: flex; gap: 0.5rem; }
 .story-dots span { width: 8px; height: 8px; border-radius: 999px; background: var(--border); transition: width 0.3s var(--ease-out), background-color 0.3s ease; }
-.story-dots span.is-active { width: 24px; background: var(--accent); }
+.story-dots span.is-active { width: 24px; background: var(--step); }
+
+/* Each feature has its own brand colour: its dot, and the glow behind its phone. */
+[data-step="pick-next"], [data-dot="pick-next"], [data-active="pick-next"] { --step: var(--daffodil); }
+[data-step="brain-dump"], [data-dot="brain-dump"], [data-active="brain-dump"] { --step: var(--pool-time); }
+[data-step="add-task-time"], [data-dot="add-task-time"], [data-active="add-task-time"] { --step: var(--poppy-fields); }
+[data-step="carried-over"], [data-dot="carried-over"], [data-active="carried-over"] { --step: var(--peaches); }
+[data-step="pace"], [data-dot="pace"], [data-active="pace"] { --step: var(--baby-lavender); }
+.feature-phone, .story-phone { position: relative; isolation: isolate; }
+.feature-phone::before, .story-phone::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: 135%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+  background: var(--step);
+  opacity: var(--step-glow);
+  transition: background-color 0.6s ease;
+}
+
+/* "New" on a feature the app just gained. */
+.feature-copy .new-tag {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.15rem 0.75rem;
+  border-radius: 999px;
+  background: var(--poppy-fields);
+  color: var(--night-time);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
 
 /* Shared look for the small working pieces inside the features. */
 .widget {
@@ -315,6 +369,17 @@ p, li { color: var(--text-primary); }
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 .segmented button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+/* The lane: the time you have, filled by the plan's tasks back to back. */
+.fit-lane {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  margin-bottom: 0.9rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-alt);
+}
+.fit-segment { flex: 0 1 0%; background: var(--segment); transition: flex-basis 0.7s var(--ease-out); }
 .fit-plan { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
 .fit-plan li {
   display: flex;
@@ -329,6 +394,46 @@ p, li { color: var(--text-primary); }
 }
 .fit-total { margin: 0.9rem 0 0; color: var(--text-secondary); font-size: 0.92rem; }
 html:not(.js) .fit-controls { display: none; }
+
+/* Start time and reminder: pick both, and the notification shows what would arrive. */
+.remind-controls { display: grid; gap: 0.5rem; margin-bottom: 1.1rem; }
+.remind-label { margin: 0.25rem 0 0; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; }
+.choices { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.choices button {
+  min-height: 40px;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.choices button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.notice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.8rem 0.9rem;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface-alt) 70%, var(--night-time) 6%);
+  box-shadow: 0 14px 30px -20px var(--shadow);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.notice img { border-radius: 9px; }
+.notice p { margin: 0; font-size: 0.92rem; line-height: 1.35; }
+.notice .notice-head { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.8rem; }
+.notice-head strong { color: var(--text-secondary); font-weight: 600; letter-spacing: 0.01em; }
+.notice-title { font-weight: 700; }
+.notice.is-arriving { animation: notice-in 0.45s cubic-bezier(0.3, 1.3, 0.5, 1) both; }
+.notice.is-off { opacity: 0.4; filter: grayscale(1); }
+.remind-hint { margin: 0.8rem 0 0; color: var(--text-secondary); font-size: 0.92rem; }
+html:not(.js) .remind-controls { display: none; }
 
 /* Brain Dump: the sentence types itself, "Sort it out" presses, and the tasks deal out. */
 .dump-text {
@@ -427,6 +532,50 @@ html:not(.js) .pace-card { display: none; }
 .cta-copy > p { margin: 0 0 1.75rem; max-width: 32rem; font-size: 1.1rem; }
 .cta-icon { display: none; }
 
+/* The closing card in each colour theme: the app's hero colours for Sage, Pastel Night and Sunny. */
+.cta-card { transition: background-color 0.45s ease; }
+.cta-card[data-theme="pastel"] {
+  --hero-card: var(--night-time);
+  --hero-title: var(--peaches);
+  --hero-cta: var(--cotton-candy);
+  --hero-blob-a: linear-gradient(135deg, var(--peaches), var(--cotton-candy));
+  --hero-blob-b: linear-gradient(135deg, var(--baby-lavender), var(--blue-skies));
+}
+.cta-card[data-theme="sunny"] {
+  --hero-card: var(--night-time);
+  --hero-title: var(--daffodil);
+  --hero-blob-a: linear-gradient(135deg, var(--peaches), var(--poppy-fields));
+  --hero-blob-b: linear-gradient(135deg, var(--daffodil), var(--pool-time));
+}
+@media (prefers-color-scheme: dark) {
+  .cta-card[data-theme="pastel"] { --hero-card: #2a3354; }
+  .cta-card[data-theme="sunny"] { --hero-card: #2a3352; }
+}
+.theme-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 1.75rem; }
+.theme-picker p { flex-basis: 100%; margin: 0 0 0.25rem; color: var(--hero-body); opacity: 0.85; font-size: 0.92rem; }
+.theme-picker button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.3rem 0.9rem 0.3rem 0.4rem;
+  border: 1.5px solid color-mix(in srgb, var(--hero-body) 35%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hero-body);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.theme-picker button[aria-pressed="true"] { border-color: var(--hero-title); background: color-mix(in srgb, var(--hero-title) 16%, transparent); }
+.theme-picker button:focus-visible { outline-color: var(--hero-title); }
+.swatch { width: 1.6rem; height: 1.6rem; border-radius: 50%; }
+.swatch-sage { background: conic-gradient(#4e8552 0 33%, var(--daffodil) 0 66%, #2f4636 0); }
+.swatch-pastel { background: conic-gradient(var(--night-time) 0 33%, var(--peaches) 0 66%, var(--cotton-candy) 0); }
+.swatch-sunny { background: conic-gradient(var(--daffodil) 0 33%, var(--poppy-fields) 0 66%, var(--pool-time) 0); }
+html:not(.js) .theme-picker { display: none; }
+
 @media (min-width: 900px) {
   .hero-card { grid-template-columns: 1.05fr 1fr; padding: 4rem 4rem 3.5rem; }
   .hero-blob-a { width: 34rem; height: 34rem; right: -14rem; top: -14rem; }
@@ -483,6 +632,7 @@ html:not(.js) .pace-card { display: none; }
 @keyframes caret { 50% { opacity: 0; } }
 @keyframes reveal { from { opacity: 0; translate: 0 2rem; } }
 @keyframes progress { to { scale: 1 1; } }
+@keyframes notice-in { from { opacity: 0; translate: 0 -0.6rem; scale: 0.96; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

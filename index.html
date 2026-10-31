@@ -66,7 +66,7 @@
           <picture>
             <source srcset="screens/today-dark.webp" media="(prefers-color-scheme: dark)">
             <img src="screens/today-light.webp" width="393" height="852"
-            alt="PaceTasks Today: a hero card saying Start small, win big, this week's days, four tasks carried over and today's plan.">
+            alt="PaceTasks Today: a hero card saying Pick up where you left off, the week from Monday to Sunday, four tasks carried over and today's plan.">
           </picture>
         </div>
         <figcaption>The demo runs on sample tasks. Nothing you type leaves your browser.</figcaption>
@@ -75,6 +75,7 @@
         <li class="chip" style="--n: 0; --x: -6%; --y: 16%">Pay the phone bill <span class="pill pill-quick">3 min</span></li>
         <li class="chip" style="--n: 1; --x: 66%; --y: 42%">Morning run <span class="pill">Before work</span></li>
         <li class="chip" style="--n: 2; --x: -4%; --y: 72%">Faturayı öde <span class="pill">Fri</span></li>
+        <li class="chip" style="--n: 3; --x: 62%; --y: 80%">Buy cat food <span class="pill pill-time">18:00</span></li>
       </ul>
     </div>
   </section>
@@ -90,6 +91,7 @@
       <li class="chip">Annaffiare le piante <span class="pill pill-quick">5 min</span></li>
       <li class="chip">Spora git <span class="pill">After work</span></li>
       <li class="chip">Send the tax documents <span class="pill">20 min</span></li>
+      <li class="chip">Buy cat food <span class="pill pill-time">18:00</span></li>
       <li class="chip">Chiamare il veterinario <span class="pill">10 min</span></li>
       <li class="chip">Market alışverişi yap <span class="pill">30 min</span></li>
     </ul>
@@ -102,6 +104,7 @@
       <li class="chip">Annaffiare le piante <span class="pill pill-quick">5 min</span></li>
       <li class="chip">Spora git <span class="pill">After work</span></li>
       <li class="chip">Send the tax documents <span class="pill">20 min</span></li>
+      <li class="chip">Buy cat food <span class="pill pill-time">18:00</span></li>
       <li class="chip">Chiamare il veterinario <span class="pill">10 min</span></li>
       <li class="chip">Market alışverişi yap <span class="pill">30 min</span></li>
     </ul>
@@ -113,8 +116,9 @@
       <section class="feature" data-step="pick-next" aria-labelledby="pickTitle">
         <div class="feature-copy reveal">
           <h2 id="pickTitle">Can't decide? It picks for you.</h2>
-          <p>Tap <strong>Pick my next task</strong>. <strong>Decide for me</strong> shows one task: a quick win while
-          there is one, then whatever matters most. Done logs how long it took and offers the next.</p>
+          <p>Tap <strong>Pick my next task</strong>. <strong>Decide for me</strong> shows one task: whatever is overdue
+          or due today first, then what matters most, and the quickest when it's a tie. Done logs how long it took and
+          offers the next.</p>
           <p><strong>Fit my time</strong> asks how much time and energy you have, and lists the tasks that fit back to
           back.</p>
           <div class="widget fit" data-fit>
@@ -128,6 +132,7 @@
                 <button type="button" data-energy="high" aria-pressed="false">High</button>
               </div>
             </div>
+            <div class="fit-lane" data-fit-lane aria-hidden="true"></div>
             <ol class="fit-plan" data-fit-plan>
               <li><span>Send the tax documents</span><span class="pill">20 min</span></li>
               <li><span>Pay the phone bill</span><span class="pill pill-quick">3 min</span></li>
@@ -139,7 +144,7 @@
         <figure class="phone feature-phone">
           <div class="phone-screen">
             <img src="screens/pick-next.webp" width="393" height="852" loading="lazy"
-            alt="Decide for me showing a single task, Call the dentist, about 5 minutes, with Done and Not now.">
+            alt="Decide for me showing a single task, Clean the bathroom, about 45 minutes and overdue, with Done and Not now.">
           </div>
         </figure>
       </section>
@@ -163,6 +168,54 @@
           <div class="phone-screen">
             <img src="screens/brain-dump.webp" width="393" height="852" loading="lazy"
             alt="Brain Dump turning that sentence into three tasks: Call the vet and Comprare il pane tomorrow, Faturayı öde on Friday.">
+          </div>
+        </figure>
+      </section>
+
+      <section class="feature" data-step="add-task-time" aria-labelledby="timeTitle">
+        <div class="feature-copy reveal">
+          <p class="new-tag">New</p>
+          <h2 id="timeTitle">A start time, and a nudge before it.</h2>
+          <p>Adding a task is one short card: the name, then a pill each for the day, how long it takes and the time.
+          Set when it starts and choose your nudge: at the start, 5, 10, 15 or 30 minutes before, or an hour ahead.</p>
+          <p>The time also places the task before or after work and gives it a Focus session. Reminders are scheduled
+          on your phone, never sent by a server.</p>
+          <div class="widget remind" data-remind>
+            <h3>Try it: <span data-remind-task>Buy cat food</span>, about 15 minutes</h3>
+            <div class="remind-controls">
+              <p class="remind-label" id="remindStartLabel">Starts at</p>
+              <div class="choices" role="group" aria-labelledby="remindStartLabel" data-remind-times>
+                <button type="button" data-time="09:00" aria-pressed="false">09:00</button>
+                <button type="button" data-time="12:30" aria-pressed="false">12:30</button>
+                <button type="button" data-time="18:00" aria-pressed="true">18:00</button>
+                <button type="button" data-time="20:30" aria-pressed="false">20:30</button>
+              </div>
+              <p class="remind-label" id="remindLeadLabel">Remind me before it starts</p>
+              <div class="choices" role="group" aria-labelledby="remindLeadLabel" data-remind-leads>
+                <button type="button" data-lead="off" aria-pressed="false">Off</button>
+                <button type="button" data-lead="0" aria-pressed="false">At start</button>
+                <button type="button" data-lead="5" aria-pressed="false">5 min</button>
+                <button type="button" data-lead="10" aria-pressed="true">10 min</button>
+                <button type="button" data-lead="15" aria-pressed="false">15 min</button>
+                <button type="button" data-lead="30" aria-pressed="false">30 min</button>
+                <button type="button" data-lead="60" aria-pressed="false">1 hour</button>
+              </div>
+            </div>
+            <div class="notice" data-remind-notice>
+              <img src="icon.png" alt="" width="38" height="38">
+              <div>
+                <p class="notice-head"><strong>PaceTasks</strong><span data-remind-at>17:50</span></p>
+                <p class="notice-title">Buy cat food</p>
+                <p data-remind-body>Starts in 10 minutes, at 18:00.</p>
+              </div>
+            </div>
+            <p class="remind-hint" data-remind-hint aria-live="polite">We'll nudge you at 17:50 today.</p>
+          </div>
+        </div>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/add-task-time.webp" width="393" height="852" loading="lazy"
+            alt="The new task card for Buy cat food starting at 18:00, with reminder choices from Off to 1 hour and 15 minutes picked: We'll nudge you at 17:45 today.">
           </div>
         </figure>
       </section>
@@ -210,12 +263,13 @@
         <div class="phone-screen">
           <img data-screen="pick-next" src="screens/pick-next.webp" alt="" width="393" height="852" loading="lazy">
           <img data-screen="brain-dump" src="screens/brain-dump.webp" alt="" width="393" height="852" loading="lazy">
+          <img data-screen="add-task-time" src="screens/add-task-time.webp" alt="" width="393" height="852" loading="lazy">
           <img data-screen="carried-over" src="screens/carried-over.webp" alt="" width="393" height="852" loading="lazy">
           <img data-screen="pace" src="screens/pace.webp" alt="" width="393" height="852" loading="lazy">
         </div>
       </div>
       <div class="story-dots">
-        <span data-dot="pick-next"></span><span data-dot="brain-dump"></span><span data-dot="carried-over"></span><span data-dot="pace"></span>
+        <span data-dot="pick-next"></span><span data-dot="brain-dump"></span><span data-dot="add-task-time"></span><span data-dot="carried-over"></span><span data-dot="pace"></span>
       </div>
     </div>
   </div>
@@ -255,6 +309,12 @@
         <p>No. An account is optional and keeps your tasks safe if you change or lose your phone.</p>
       </details>
       <details>
+        <summary>Will it remind me?</summary>
+        <p>If you want. Give a task a start time and choose when to be nudged, from the moment it starts to an hour
+        before. A daily check-in can also nudge you once, only on days with tasks still open. Both are scheduled on
+        your phone.</p>
+      </details>
+      <details>
         <summary>Does the demo keep what I type?</summary>
         <p>No. It runs entirely in your browser on sample tasks, and everything resets when you reload.</p>
       </details>
@@ -271,6 +331,12 @@
       <div class="hero-actions">
         <a class="button button-hero" href="demo/">Try it in your browser</a>
         <p class="hero-status">Coming soon to iPhone</p>
+      </div>
+      <div class="theme-picker" role="group" aria-labelledby="themePickerLabel" data-theme-picker>
+        <p id="themePickerLabel">Three colour themes, light and dark. Try one on this card:</p>
+        <button type="button" data-theme="sage" aria-pressed="true"><span class="swatch swatch-sage" aria-hidden="true"></span>Sage</button>
+        <button type="button" data-theme="pastel" aria-pressed="false"><span class="swatch swatch-pastel" aria-hidden="true"></span>Pastel Night</button>
+        <button type="button" data-theme="sunny" aria-pressed="false"><span class="swatch swatch-sunny" aria-hidden="true"></span>Sunny</button>
       </div>
     </div>
     <img class="cta-icon" src="icon.png" alt="" width="132" height="132">

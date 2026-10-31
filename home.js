@@ -1,6 +1,7 @@
 // The landing page's moving parts: the live demo in the hero phone, the tilting
 // phone fan, the pinned phone that follows the features, Brain Dump typing itself,
-// a working "Fit my time" and the Pace heatmap. All of it rests when motion is reduced.
+// a working "Fit my time", the reminder picker, the Pace heatmap and the colour
+// themes on the closing card. All of it rests when motion is reduced.
 (function () {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const wideScreen = window.matchMedia("(min-width: 900px)");
@@ -80,6 +81,7 @@
     const dots = [...stage.querySelectorAll("[data-dot]")];
 
     const show = (key) => {
+      stage.dataset.active = key;
       screens.forEach((screen) => screen.classList.toggle("is-active", screen.dataset.screen === key));
       dots.forEach((dot) => dot.classList.toggle("is-active", dot.dataset.dot === key));
     };
@@ -134,6 +136,8 @@
   const ENERGY_LEVELS = ["low", "medium", "high"];
   const PRIORITY_ORDER = ["high", "medium", "low"];
   const QUICK_WIN_MINUTES = 5;
+  // The app's brand colours, one per task in the lane.
+  const LANE_COLORS = ["--daffodil", "--pool-time", "--peaches", "--cotton-candy", "--blue-skies", "--baby-lavender"];
 
   function planFor(availableMinutes, energy) {
     const energyRank = (level) => ENERGY_LEVELS.indexOf(level);
@@ -166,6 +170,23 @@
     return minutes === 60 ? "1 hour" : `${minutes} min`;
   }
 
+  // The lane starts empty and fills to each task's share of the time, so every change visibly refills it.
+  function renderLane(lane, plan, availableMinutes) {
+    const segments = plan.map((task, index) => {
+      const segment = document.createElement("span");
+      segment.className = "fit-segment";
+      segment.style.setProperty("--segment", `var(${LANE_COLORS[index % LANE_COLORS.length]})`);
+      return segment;
+    });
+    lane.replaceChildren(...segments);
+    const fill = () =>
+      segments.forEach((segment, index) => {
+        segment.style.flexBasis = `${(plan[index].minutes / availableMinutes) * 100}%`;
+      });
+    if (reduceMotion.matches) fill();
+    else window.requestAnimationFrame(() => window.requestAnimationFrame(fill));
+  }
+
   function setupFitMyTime() {
     const fit = document.querySelector("[data-fit]");
     if (!fit) return;
@@ -173,6 +194,7 @@
     const output = fit.querySelector("[data-fit-output]");
     const energyButtons = [...fit.querySelectorAll("[data-energy]")];
     const list = fit.querySelector("[data-fit-plan]");
+    const lane = fit.querySelector("[data-fit-lane]");
     const total = fit.querySelector("[data-fit-total]");
     let energy = "medium";
 
@@ -180,6 +202,7 @@
       const minutes = Number(slider.value);
       const { plan, used } = planFor(minutes, energy);
       output.textContent = minutesLabel(minutes);
+      if (lane) renderLane(lane, plan, minutes);
       energyButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.energy === energy)));
 
       list.replaceChildren(
@@ -260,10 +283,90 @@
     else whenVisible(heatmap, finish);
   }
 
+  // The reminder picker: the notification and the hint use the app's own wording (src/lib/reminderCopy.ts).
+  const TIMED_TASK_MINUTES = 15;
+
+  function shiftTime(time, minutesEarlier) {
+    const [hours, minutes] = time.split(":").map(Number);
+    const total = (hours * 60 + minutes - minutesEarlier + 24 * 60) % (24 * 60);
+    return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  }
+
+  function reminderBody(time, lead) {
+    if (lead === 0) return `Starting now, about ${TIMED_TASK_MINUTES} min.`;
+    const leadText = lead === 60 ? "1 hour" : `${lead} minutes`;
+    return `Starts in ${leadText}, at ${time}.`;
+  }
+
+  function setupReminder() {
+    const remind = document.querySelector("[data-remind]");
+    if (!remind) return;
+    const timeButtons = [...remind.querySelectorAll("[data-time]")];
+    const leadButtons = [...remind.querySelectorAll("[data-lead]")];
+    const notice = remind.querySelector("[data-remind-notice]");
+    const at = remind.querySelector("[data-remind-at]");
+    const body = remind.querySelector("[data-remind-body]");
+    const hint = remind.querySelector("[data-remind-hint]");
+    let time = "18:00";
+    let lead = 10; // the app's default nudge; null means Off
+
+    const render = () => {
+      timeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.time === time)));
+      leadButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.lead === String(lead ?? "off"))));
+      notice.classList.toggle("is-off", lead === null);
+      if (lead === null) {
+        hint.textContent = `No reminder. The task waits on Today, starting at ${time}.`;
+        return;
+      }
+      const fireAt = shiftTime(time, lead);
+      at.textContent = fireAt;
+      body.textContent = reminderBody(time, lead);
+      hint.textContent = `We'll nudge you at ${fireAt} today.`;
+      if (!reduceMotion.matches) {
+        notice.classList.remove("is-arriving");
+        void notice.offsetWidth; // restarts the arrival animation for each new choice
+        notice.classList.add("is-arriving");
+      }
+    };
+
+    timeButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        time = button.dataset.time;
+        render();
+      })
+    );
+    leadButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        lead = button.dataset.lead === "off" ? null : Number(button.dataset.lead);
+        render();
+      })
+    );
+    render();
+  }
+
+  // The closing card wears each of the app's colour themes, with the hero colours from src/lib/theme.ts.
+  function setupThemePicker() {
+    const picker = document.querySelector("[data-theme-picker]");
+    const card = picker?.closest(".cta-card");
+    if (!picker || !card) return;
+    const buttons = [...picker.querySelectorAll("[data-theme]")];
+
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const theme = button.dataset.theme;
+        card.dataset.theme = theme;
+        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+        console.info(`[home] closing card shows the ${theme} theme`);
+      })
+    );
+  }
+
   setupDemoLaunch();
   setupHeroTilt();
   setupStory();
   setupBrainDump();
   setupFitMyTime();
+  setupReminder();
   setupPace();
+  setupThemePicker();
 })();
