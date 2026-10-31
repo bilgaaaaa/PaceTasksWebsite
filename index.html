@@ -16,10 +16,14 @@
   <link rel="icon" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="stylesheet" href="site.css">
+  <!-- Lets the page tell CSS that scripts run, so parts that need them can show. -->
+  <script>document.documentElement.classList.add("js");</script>
   <script src="site.js" defer></script>
+  <script src="home.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+<div class="scroll-progress" aria-hidden="true"></div>
 
 <header class="site-header">
   <a class="brand" href="./"><img src="icon.png" alt="" width="36" height="36">PaceTasks</a>
@@ -31,12 +35,17 @@
 </header>
 
 <main id="main" class="landing">
-  <!-- Hero: the app's own Today hero card at page size, with the phone beside it. -->
+  <!-- Hero: the app's own Today hero card at page size, with the phones fanned out beside it. -->
   <section class="hero-card" aria-labelledby="heroTitle">
     <span class="hero-blob hero-blob-a" aria-hidden="true"></span>
     <span class="hero-blob hero-blob-b" aria-hidden="true"></span>
     <div class="hero-copy">
-      <h1 id="heroTitle">Tell me what I need to do.</h1>
+      <h1 id="heroTitle" class="hero-title">
+        <span class="word" style="--w: 0">Tell</span> <span class="word" style="--w: 1">me</span>
+        <span class="word" style="--w: 2">what</span> <span class="word" style="--w: 3">I</span>
+        <span class="word" style="--w: 4">need</span> <span class="word" style="--w: 5">to</span>
+        <span class="word" style="--w: 6">do.</span>
+      </h1>
       <p class="hero-lede">PaceTasks figures out how to fit it into your life. Catch personal tasks the moment you
       think of them, then get them done before or after work, with the time and energy you really have.</p>
       <div class="hero-actions">
@@ -45,83 +54,229 @@
         <p class="hero-status">Coming soon to iPhone</p>
       </div>
     </div>
-    <figure class="phone hero-phone" data-demo-phone>
-      <div class="phone-screen">
-        <picture>
-          <source srcset="screens/today-dark.webp" media="(prefers-color-scheme: dark)">
-          <img src="screens/today-light.webp" width="393" height="852"
-          alt="PaceTasks Today: a hero card saying Start small, win big, this week's days, four tasks carried over and today's plan.">
-        </picture>
+    <div class="hero-visual" data-tilt>
+      <div class="phone hero-side hero-side-left" aria-hidden="true">
+        <div class="phone-screen"><img src="screens/brain-dump.webp" alt="" width="393" height="852"></div>
       </div>
-      <figcaption>The demo runs on sample tasks. Nothing you type leaves your browser.</figcaption>
-    </figure>
+      <div class="phone hero-side hero-side-right" aria-hidden="true">
+        <div class="phone-screen"><img src="screens/pace.webp" alt="" width="393" height="852"></div>
+      </div>
+      <figure class="phone hero-phone" data-demo-phone>
+        <div class="phone-screen">
+          <picture>
+            <source srcset="screens/today-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="screens/today-light.webp" width="393" height="852"
+            alt="PaceTasks Today: a hero card saying Pick up where you left off, the week from Monday to Sunday, four tasks carried over and today's plan.">
+          </picture>
+        </div>
+        <figcaption>The demo runs on sample tasks. Nothing you type leaves your browser.</figcaption>
+      </figure>
+      <ul class="hero-chips" aria-hidden="true">
+        <li class="chip" style="--n: 0; --x: -6%; --y: 16%">Pay the phone bill <span class="pill pill-quick">3 min</span></li>
+        <li class="chip" style="--n: 1; --x: 66%; --y: 42%">Morning run <span class="pill">Before work</span></li>
+        <li class="chip" style="--n: 2; --x: -4%; --y: 72%">Faturayı öde <span class="pill">Fri</span></li>
+        <li class="chip" style="--n: 3; --x: 62%; --y: 80%">Buy cat food <span class="pill pill-time">18:00</span></li>
+      </ul>
+    </div>
   </section>
 
-  <div class="features">
-    <section class="feature" aria-labelledby="pickTitle">
-      <div>
-        <h2 id="pickTitle">Can't decide? It picks for you.</h2>
-        <p>Tap <strong>Pick my next task</strong>. <strong>Decide for me</strong> shows one task: a quick win while there
-        is one, then whatever matters most. Done logs how long it took and offers the next.</p>
-        <p><strong>Fit my time</strong> asks how much time and energy you have, from 5 minutes to an hour, and lists the
-        tasks that fit back to back.</p>
-      </div>
-      <figure class="phone">
-        <div class="phone-screen">
-          <img src="screens/pick-next.webp" width="393" height="852" loading="lazy"
-          alt="Decide for me showing a single task, Call the dentist, about 5 minutes, with Done and Not now.">
-        </div>
-      </figure>
-    </section>
+  <!-- Real tasks in the three languages Brain Dump reads, drifting past. -->
+  <div class="ribbon" aria-hidden="true">
+    <ul class="ribbon-track">
+      <li class="chip">Call the vet <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Comprare il pane <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Reply to Marco <span class="pill">10 min</span></li>
+      <li class="chip">Annemi ara <span class="pill">15 min</span></li>
+      <li class="chip">Plan the weekend trip <span class="pill">30 min</span></li>
+      <li class="chip">Annaffiare le piante <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Spora git <span class="pill">After work</span></li>
+      <li class="chip">Send the tax documents <span class="pill">20 min</span></li>
+      <li class="chip">Buy cat food <span class="pill pill-time">18:00</span></li>
+      <li class="chip">Chiamare il veterinario <span class="pill">10 min</span></li>
+      <li class="chip">Market alışverişi yap <span class="pill">30 min</span></li>
+    </ul>
+    <ul class="ribbon-track">
+      <li class="chip">Call the vet <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Comprare il pane <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Reply to Marco <span class="pill">10 min</span></li>
+      <li class="chip">Annemi ara <span class="pill">15 min</span></li>
+      <li class="chip">Plan the weekend trip <span class="pill">30 min</span></li>
+      <li class="chip">Annaffiare le piante <span class="pill pill-quick">5 min</span></li>
+      <li class="chip">Spora git <span class="pill">After work</span></li>
+      <li class="chip">Send the tax documents <span class="pill">20 min</span></li>
+      <li class="chip">Buy cat food <span class="pill pill-time">18:00</span></li>
+      <li class="chip">Chiamare il veterinario <span class="pill">10 min</span></li>
+      <li class="chip">Market alışverişi yap <span class="pill">30 min</span></li>
+    </ul>
+  </div>
 
-    <section class="feature" aria-labelledby="dumpTitle">
-      <div>
-        <h2 id="dumpTitle">Say everything at once.</h2>
-        <p>Tap the microphone and type or dictate whatever is on your mind, in English, Italian, Turkish or a mix.
-        PaceTasks shows the tasks it understood before anything is added.</p>
-        <blockquote class="feature-quote">“Tomorrow call the vet, domani comprare il pane, cuma günü faturayı öde”</blockquote>
-      </div>
-      <figure class="phone">
-        <div class="phone-screen">
-          <img src="screens/brain-dump.webp" width="393" height="852" loading="lazy"
-          alt="Brain Dump turning that sentence into three tasks: Call the vet and Comprare il pane tomorrow, Faturayı öde on Friday.">
+  <!-- Features: text scrolls on the left while one pinned phone shows each screen (home.js). -->
+  <div class="story">
+    <div class="story-steps">
+      <section class="feature" data-step="pick-next" aria-labelledby="pickTitle">
+        <div class="feature-copy reveal">
+          <h2 id="pickTitle">Can't decide? It picks for you.</h2>
+          <p>Tap <strong>Pick my next task</strong>. <strong>Decide for me</strong> shows one task: whatever is overdue
+          or due today first, then what matters most, and the quickest when it's a tie. Done logs how long it took and
+          offers the next.</p>
+          <p><strong>Fit my time</strong> asks how much time and energy you have, and lists the tasks that fit back to
+          back.</p>
+          <div class="widget fit" data-fit>
+            <h3>Try Fit my time with sample tasks</h3>
+            <div class="fit-controls">
+              <label class="fit-label" for="fitMinutes">Time I have <output for="fitMinutes" data-fit-output>30 min</output></label>
+              <input id="fitMinutes" type="range" min="5" max="60" step="5" value="30">
+              <div class="segmented" role="group" aria-label="Energy I have">
+                <button type="button" data-energy="low" aria-pressed="false">Low</button>
+                <button type="button" data-energy="medium" aria-pressed="true">Normal</button>
+                <button type="button" data-energy="high" aria-pressed="false">High</button>
+              </div>
+            </div>
+            <div class="fit-lane" data-fit-lane aria-hidden="true"></div>
+            <ol class="fit-plan" data-fit-plan>
+              <li><span>Send the tax documents</span><span class="pill">20 min</span></li>
+              <li><span>Pay the phone bill</span><span class="pill pill-quick">3 min</span></li>
+              <li><span>Call the dentist</span><span class="pill pill-quick">5 min</span></li>
+            </ol>
+            <p class="fit-total" data-fit-total aria-live="polite">3 tasks, 28 of 30 minutes</p>
+          </div>
         </div>
-      </figure>
-    </section>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/pick-next.webp" width="393" height="852" loading="lazy"
+            alt="Decide for me showing a single task, Clean the bathroom, about 45 minutes and overdue, with Done and Not now.">
+          </div>
+        </figure>
+      </section>
 
-    <section class="feature" aria-labelledby="rolloverTitle">
-      <div>
-        <h2 id="rolloverTitle">Unfinished tasks find a new day.</h2>
-        <p>Yesterday's leftovers don't pile up. One row on Today proposes where each should go: today, tomorrow, the
-        weekend or someday. Change any of them, then apply.</p>
-        <p>When tasks have waited too long, <strong>Weekly Reset</strong> walks you through them one at a time.</p>
-      </div>
-      <figure class="phone">
-        <div class="phone-screen">
-          <img src="screens/carried-over.webp" width="393" height="852" loading="lazy"
-          alt="Four tasks carried over, each with a proposed day: Someday, Weekend or Today.">
+      <section class="feature" data-step="brain-dump" aria-labelledby="dumpTitle">
+        <div class="feature-copy reveal">
+          <h2 id="dumpTitle">Say everything at once.</h2>
+          <p>Tap the microphone and type or dictate whatever is on your mind, in English, Italian, Turkish or a mix.
+          PaceTasks shows the tasks it understood before anything is added.</p>
+          <div class="widget dump" data-dump>
+            <p class="dump-text" data-dump-text>Tomorrow call the vet, domani comprare il pane, cuma günü faturayı öde</p>
+            <span class="dump-button" aria-hidden="true">Sort it out</span>
+            <ul class="dump-cards">
+              <li class="dump-card" style="--i: 0"><strong>Call the vet</strong><span>Tomorrow · 5 min · Personal</span></li>
+              <li class="dump-card" style="--i: 1"><strong>Comprare il pane</strong><span>Tomorrow · 5 min · Shopping</span></li>
+              <li class="dump-card" style="--i: 2"><strong>Faturayı öde</strong><span>Fri · 5 min · Home</span></li>
+            </ul>
+          </div>
         </div>
-      </figure>
-    </section>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/brain-dump.webp" width="393" height="852" loading="lazy"
+            alt="Brain Dump turning that sentence into three tasks: Call the vet and Comprare il pane tomorrow, Faturayı öde on Friday.">
+          </div>
+        </figure>
+      </section>
 
-    <section class="feature" aria-labelledby="paceTitle">
-      <div>
-        <h2 id="paceTitle">Compete only with your own pace.</h2>
-        <p>Streaks, minutes, a 13-week heatmap and how close your estimates come to reality. After ten finished tasks,
-        <strong>My Pace</strong> tells you in plain sentences when you get the most done.</p>
-      </div>
-      <figure class="phone">
-        <div class="phone-screen">
-          <img src="screens/pace.webp" width="393" height="852" loading="lazy"
-          alt="Your pace: tasks and minutes done today, current and best streak, estimate accuracy and a 13-week heatmap.">
+      <section class="feature" data-step="add-task-time" aria-labelledby="timeTitle">
+        <div class="feature-copy reveal">
+          <p class="new-tag">New</p>
+          <h2 id="timeTitle">A start time, and a nudge before it.</h2>
+          <p>Adding a task is one short card: the name, then a pill each for the day, how long it takes and the time.
+          Set when it starts and choose your nudge: at the start, 5, 10, 15 or 30 minutes before, or an hour ahead.</p>
+          <p>The time also places the task before or after work and gives it a Focus session. Reminders are scheduled
+          on your phone, never sent by a server.</p>
+          <div class="widget remind" data-remind>
+            <h3>Try it: <span data-remind-task>Buy cat food</span>, about 15 minutes</h3>
+            <div class="remind-controls">
+              <p class="remind-label" id="remindStartLabel">Starts at</p>
+              <div class="choices" role="group" aria-labelledby="remindStartLabel" data-remind-times>
+                <button type="button" data-time="09:00" aria-pressed="false">09:00</button>
+                <button type="button" data-time="12:30" aria-pressed="false">12:30</button>
+                <button type="button" data-time="18:00" aria-pressed="true">18:00</button>
+                <button type="button" data-time="20:30" aria-pressed="false">20:30</button>
+              </div>
+              <p class="remind-label" id="remindLeadLabel">Remind me before it starts</p>
+              <div class="choices" role="group" aria-labelledby="remindLeadLabel" data-remind-leads>
+                <button type="button" data-lead="off" aria-pressed="false">Off</button>
+                <button type="button" data-lead="0" aria-pressed="false">At start</button>
+                <button type="button" data-lead="5" aria-pressed="false">5 min</button>
+                <button type="button" data-lead="10" aria-pressed="true">10 min</button>
+                <button type="button" data-lead="15" aria-pressed="false">15 min</button>
+                <button type="button" data-lead="30" aria-pressed="false">30 min</button>
+                <button type="button" data-lead="60" aria-pressed="false">1 hour</button>
+              </div>
+            </div>
+            <div class="notice" data-remind-notice>
+              <img src="icon.png" alt="" width="38" height="38">
+              <div>
+                <p class="notice-head"><strong>PaceTasks</strong><span data-remind-at>17:50</span></p>
+                <p class="notice-title">Buy cat food</p>
+                <p data-remind-body>Starts in 10 minutes, at 18:00.</p>
+              </div>
+            </div>
+            <p class="remind-hint" data-remind-hint aria-live="polite">We'll nudge you at 17:50 today.</p>
+          </div>
         </div>
-      </figure>
-    </section>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/add-task-time.webp" width="393" height="852" loading="lazy"
+            alt="The new task card for Buy cat food starting at 18:00, with reminder choices from Off to 1 hour and 15 minutes picked: We'll nudge you at 17:45 today.">
+          </div>
+        </figure>
+      </section>
+
+      <section class="feature" data-step="carried-over" aria-labelledby="rolloverTitle">
+        <div class="feature-copy reveal">
+          <h2 id="rolloverTitle">Unfinished tasks find a new day.</h2>
+          <p>Yesterday's leftovers don't pile up. One row on Today proposes where each should go: today, tomorrow, the
+          weekend or someday. Change any of them, then apply.</p>
+          <p>When tasks have waited too long, <strong>Weekly Reset</strong> walks you through them one at a time.</p>
+        </div>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/carried-over.webp" width="393" height="852" loading="lazy"
+            alt="Four tasks carried over, each with a proposed day: Someday, Weekend or Today.">
+          </div>
+        </figure>
+      </section>
+
+      <section class="feature" data-step="pace" aria-labelledby="paceTitle">
+        <div class="feature-copy reveal">
+          <h2 id="paceTitle">Compete only with your own pace.</h2>
+          <p>Streaks, minutes, a 13-week heatmap and how close your estimates come to reality. After ten finished
+          tasks, <strong>My Pace</strong> tells you in plain sentences when you get the most done.</p>
+          <div class="widget pace-card">
+            <div class="pace-stats">
+              <p><strong data-count-to="9">9</strong> day streak</p>
+              <p><strong><span data-count-to="94">94</span>%</strong> estimate accuracy</p>
+            </div>
+            <div class="heatmap" data-heatmap role="img" aria-label="Sample heatmap: 13 weeks of finished tasks, busier in recent weeks"></div>
+            <p class="pace-caption">Sample history</p>
+          </div>
+        </div>
+        <figure class="phone feature-phone">
+          <div class="phone-screen">
+            <img src="screens/pace.webp" width="393" height="852" loading="lazy"
+            alt="Your pace: tasks and minutes done today, current and best streak, estimate accuracy and a 13-week heatmap.">
+          </div>
+        </figure>
+      </section>
+    </div>
+
+    <div class="story-stage" data-story-stage aria-hidden="true">
+      <div class="phone story-phone">
+        <div class="phone-screen">
+          <img data-screen="pick-next" src="screens/pick-next.webp" alt="" width="393" height="852" loading="lazy">
+          <img data-screen="brain-dump" src="screens/brain-dump.webp" alt="" width="393" height="852" loading="lazy">
+          <img data-screen="add-task-time" src="screens/add-task-time.webp" alt="" width="393" height="852" loading="lazy">
+          <img data-screen="carried-over" src="screens/carried-over.webp" alt="" width="393" height="852" loading="lazy">
+          <img data-screen="pace" src="screens/pace.webp" alt="" width="393" height="852" loading="lazy">
+        </div>
+      </div>
+      <div class="story-dots">
+        <span data-dot="pick-next"></span><span data-dot="brain-dump"></span><span data-dot="add-task-time"></span><span data-dot="carried-over"></span><span data-dot="pace"></span>
+      </div>
+    </div>
   </div>
 
   <section class="split" aria-labelledby="privacyTitle">
-    <h2 id="privacyTitle">Your tasks stay yours.</h2>
-    <div>
+    <h2 id="privacyTitle" class="reveal">Your tasks stay yours.</h2>
+    <div class="reveal">
       <ul class="promise-list">
         <li><strong>No ads, no trackers, no analytics.</strong>
           <span>Your data is never sold or shared for marketing.</span></li>
@@ -138,8 +293,8 @@
   </section>
 
   <section class="split" aria-labelledby="questionsTitle">
-    <h2 id="questionsTitle">Questions</h2>
-    <div class="questions">
+    <h2 id="questionsTitle" class="reveal">Questions</h2>
+    <div class="questions reveal">
       <details>
         <summary>When can I get it?</summary>
         <p>PaceTasks is getting ready for its first beta on iPhone. Until then, the demo runs the whole app in your
@@ -154,11 +309,37 @@
         <p>No. An account is optional and keeps your tasks safe if you change or lose your phone.</p>
       </details>
       <details>
+        <summary>Will it remind me?</summary>
+        <p>If you want. Give a task a start time and choose when to be nudged, from the moment it starts to an hour
+        before. A daily check-in can also nudge you once, only on days with tasks still open. Both are scheduled on
+        your phone.</p>
+      </details>
+      <details>
         <summary>Does the demo keep what I type?</summary>
         <p>No. It runs entirely in your browser on sample tasks, and everything resets when you reload.</p>
       </details>
       <p>More answers in <a href="support.html">Help and support</a>.</p>
     </div>
+  </section>
+
+  <section class="hero-card cta-card reveal" aria-labelledby="ctaTitle">
+    <span class="hero-blob hero-blob-a" aria-hidden="true"></span>
+    <span class="hero-blob hero-blob-b" aria-hidden="true"></span>
+    <div class="cta-copy">
+      <h2 id="ctaTitle">Plan tonight in a minute.</h2>
+      <p>Try the whole app in your browser with sample tasks. Nothing to install, nothing saved.</p>
+      <div class="hero-actions">
+        <a class="button button-hero" href="demo/">Try it in your browser</a>
+        <p class="hero-status">Coming soon to iPhone</p>
+      </div>
+      <div class="theme-picker" role="group" aria-labelledby="themePickerLabel" data-theme-picker>
+        <p id="themePickerLabel">Three colour themes, light and dark. Try one on this card:</p>
+        <button type="button" data-theme="sage" aria-pressed="true"><span class="swatch swatch-sage" aria-hidden="true"></span>Sage</button>
+        <button type="button" data-theme="pastel" aria-pressed="false"><span class="swatch swatch-pastel" aria-hidden="true"></span>Pastel Night</button>
+        <button type="button" data-theme="sunny" aria-pressed="false"><span class="swatch swatch-sunny" aria-hidden="true"></span>Sunny</button>
+      </div>
+    </div>
+    <img class="cta-icon" src="icon.png" alt="" width="132" height="132">
   </section>
 </main>
 
