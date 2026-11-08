@@ -1,6 +1,6 @@
-# Publishes the website: the pages in this repository plus the web demo, built
-# from the PaceTasks app (bilgaaaaa/pacetasks) into demo/. Runs daily too, so the
-# demo follows the app's main branch. Pull requests only build the site.
+# Publishes the web demo, built from the PaceTasks app (bilgaaaaa/pacetasks) into
+# demo/, next to the pages that send old addresses to the new site. Runs daily too,
+# so the demo follows the app's main branch. Pull requests only build the site.
 name: Deploy
 
 on:
